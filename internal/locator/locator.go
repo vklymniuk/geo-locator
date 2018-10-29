@@ -13,40 +13,32 @@ type IpLocator struct {
 }
 
 type Tier struct {
-	name string
+	Name string `json:"name"`
 }
 
 type Location struct {
-	countryNames  map[string]string
-	isoCode string
-	tier *Tier
+	CountryNames map[string]string `json:"country_names"`
+	IsoCode      string            `json:"iso_code"`
+	Tier         *Tier             `json:"tier"`
 }
 
-type GetLocation interface {
-	GetLocation(ip string) *Location
+type FetchLocation interface {
+	LocateByIp(ip string) *Location
 }
 
-type GetTier interface {
-	GetTier(location *Location) *Tier
-}
-
-func (location *Location) GetTier() (*Tier) {
-	return location.tier
-}
-
-func (locator *IpLocator) GetLocation(ip string) (*Location) {
+func (locator *IpLocator) LocateByIp(ip string) *Location {
 	country, countryErr := locator.reader.Country(net.ParseIP(ip))
 
 	if countryErr != nil {
 		return &Location{
-			tier: &Tier{"default-tier-name"},
+			Tier: &Tier{"tier-2"},
 		}
 	}
 
 	return &Location{
-		countryNames: country.Country.Names,
-		isoCode: country.Country.IsoCode,
-		tier: &Tier{"some-tier-name"},
+		CountryNames: country.Country.Names,
+		IsoCode:      country.Country.IsoCode,
+		Tier:         &Tier{"some-tier-name"},
 	}
 }
 
@@ -57,5 +49,5 @@ func New(filePath string) *IpLocator {
 		log.Fatal(err)
 	}
 
-	return &IpLocator{reader:reader}
+	return &IpLocator{reader: reader}
 }
